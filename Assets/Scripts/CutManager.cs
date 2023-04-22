@@ -11,7 +11,10 @@ public class CutManager : MonoBehaviour
     Vector3 offset;
     bool CutPiece = false;
     [SerializeField]
-    Log[] logs;
+    public List<Log> logs;
+    [SerializeField]
+    int Goal;
+    List<Log> newLogs;
     // Start is called before the first frame update
     void Start()
     {
@@ -30,12 +33,18 @@ public class CutManager : MonoBehaviour
         //    var wantedPos = Camera.main.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, depth));
         //    transform.position = Vector3.MoveTowards(transform.position, wantedPos, speed * Time.deltaTime);
         //}
+
+        if (logs.Count >= Goal)
+        {
+            Debug.Log("Victory!");
+        }
     }
 
     void OnMouseDown()
     {
+        newLogs = new List<Log>();
         mouseDragging = true;
-        Debug.Log("CutManager MouseDown");
+        
         //translate the cubes position from the world to Screen Point
         screenSpace = Camera.main.WorldToScreenPoint(transform.position);
         foreach (Log log in logs)
@@ -49,6 +58,8 @@ public class CutManager : MonoBehaviour
     void OnMouseUp()
     {
         mouseDragging = false;
+        logs.AddRange(newLogs);
+        newLogs = new List<Log>();
     }
 
 
@@ -74,9 +85,13 @@ public class CutManager : MonoBehaviour
                 if (Vector3.Distance(calcPos, box.transform.position) < .5f)
                 {
 
-                    if (!CutPiece)
+                    if (!log.pieceCutRecently)
                     {
-                        log.CutPiece(box);
+                        Log newLog = log.CutPiece(box);
+                        if(newLog != null)
+                        {
+                            newLogs.Add(newLog);
+                        }
                         log.pieceCutRecently = true;
                         break;
                     }
@@ -84,7 +99,6 @@ public class CutManager : MonoBehaviour
             }
         }
         
-
         ////update the position of the object in the world
         //transform.position = curPosition;
     }

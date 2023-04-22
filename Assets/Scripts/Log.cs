@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Log : MonoBehaviour
 {
+
+    [SerializeField]
+    CutManager cutManager;
+
     public List<Box> Parts;
 
     public bool pieceCutRecently = false;
@@ -16,9 +20,11 @@ public class Log : MonoBehaviour
         {
             if(child.GetComponent<Box>() != null)
             {
+                if (Parts.Contains(child.GetComponent<Box>())) { continue; }
                 Parts.Add(child.GetComponent<Box>());
             }
-        }   
+        }
+     cutManager = FindAnyObjectByType<CutManager>();
     }
 
     // Update is called once per frame
@@ -27,15 +33,58 @@ public class Log : MonoBehaviour
         
     }
 
-    public void CutPiece(Box partToCut)
+    public Log CutPiece(Box partToCut)
     {
+        if(pieceCutRecently == true)
+        {
+            return null;
+        }
+        if(Parts.Count <= baseNumber)
+        {
+            return null;
+        }
         pieceCutRecently = true;
         //delete cut piece from parts
         //parts needs to be sorted
         Debug.Log(partToCut.name);
-        Parts.Remove(partToCut);
+        List<Box> oldLog = new List<Box>();
+        List<Box> newLog = new List<Box>();
+        bool found = false;
+        foreach(Box part in Parts)
+        {
+            if(part == partToCut)
+            {
+
+                found = true;
+                continue;
+                //Parts.Remove(partToCut);
+                //partToCut.gameObject.SetActive(false);
+            }
+            if (!found)
+            {
+
+                oldLog.Add(part);
+                continue;
+            }
+            else
+            {
+                if (newLog.Contains(part)) { continue; }
+                newLog.Add(part);
+            }
+
+        }
+        Parts = oldLog;
         partToCut.gameObject.SetActive(false);
         //spawn new log that has pieces not in my part
+        GameObject newObj = new GameObject();
+        newObj.AddComponent<Log>();
+        newObj.GetComponent<Log>().Parts = newLog;
+        foreach(Box part in newLog)
+        {
+            part.transform.parent = newObj.transform;
+        }
+        return newObj.GetComponent<Log>();
+        //Instantiate(newObj);
         //handle end edge case
     }
 }
