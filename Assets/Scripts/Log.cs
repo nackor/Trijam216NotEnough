@@ -16,7 +16,8 @@ public class Log : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-     foreach(Transform child in this.transform)
+        
+     foreach (Transform child in this.transform)
         {
             if(child.GetComponent<Box>() != null)
             {
@@ -50,16 +51,26 @@ public class Log : MonoBehaviour
         List<Box> oldLog = new List<Box>();
         List<Box> newLog = new List<Box>();
         bool found = false;
+        int count = 0;
+        bool makeNew = true;
         foreach(Box part in Parts)
         {
+
             if(part == partToCut)
             {
 
                 found = true;
+                if(count==0 || count == Parts.Count - 1)
+                {
+                    makeNew = false;
+
+                }
+                count++;
                 continue;
                 //Parts.Remove(partToCut);
                 //partToCut.gameObject.SetActive(false);
             }
+            count++;
             if (!found)
             {
 
@@ -75,6 +86,10 @@ public class Log : MonoBehaviour
         }
         Parts = oldLog;
         partToCut.gameObject.SetActive(false);
+        if (!makeNew)
+        {
+            return null;
+        }
         //spawn new log that has pieces not in my part
         GameObject newObj = new GameObject();
         newObj.AddComponent<Log>();
